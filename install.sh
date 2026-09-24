@@ -32,7 +32,7 @@ write_goenv() {
   local temp_file
   home_escaped="${home_escaped//&/\\&}"
   mkdir -p "$(dirname "$target")"
-  temp_file="$(mktemp "${target}.tmp.XXXXXX")"
+  temp_file="$(mktemp)"
   sed "s|__HOME__|$home_escaped|g" "$repo_root/.config/go/env" > "$temp_file"
   mv "$temp_file" "$target"
 }

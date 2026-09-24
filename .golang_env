@@ -2,6 +2,8 @@ export GOPATH="${GOPATH:-$HOME/go}"
 export GOBIN="${GOBIN:-$GOPATH/bin}"
 
 add_to_path() {
+  [ -n "$1" ] || return 0
+
   case ":$PATH:" in
     *":$1:"*) ;;
     *) PATH="$1:$PATH" ;;
