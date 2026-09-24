@@ -17,8 +17,10 @@ ensure_line() {
 
 write_goenv() {
   local target="$HOME/.config/go/env"
+  local home_escaped="${HOME//\\/\\\\}"
+  home_escaped="${home_escaped//&/\\&}"
   mkdir -p "$(dirname "$target")"
-  sed "s|__HOME__|$HOME|g" "$repo_root/.config/go/env" > "$target"
+  sed "s|__HOME__|$home_escaped|g" "$repo_root/.config/go/env" > "$target"
 }
 
 link_file() {
@@ -46,6 +48,10 @@ if command -v git >/dev/null 2>&1; then
   fi
 fi
 
-ensure_line "$HOME/.vimrc" 'source ~/.vimrc.dotfiles-go'
+if [ -e "$HOME/.vimrc" ] && [ "$HOME/.vimrc" -ef "$HOME/.vimrc.dotfiles-go" ]; then
+  :
+else
+  ensure_line "$HOME/.vimrc" 'source ~/.vimrc.dotfiles-go'
+fi
 
 mkdir -p "$HOME/go/bin" "$HOME/go/pkg" "$HOME/go/src"
