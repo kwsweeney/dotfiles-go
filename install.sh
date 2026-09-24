@@ -52,9 +52,7 @@ write_goenv
 
 ensure_line "$HOME/.bashrc" '[ -f "$HOME/.golang_env" ] && . "$HOME/.golang_env"'
 ensure_line "$HOME/.profile" '[ -f "$HOME/.golang_env" ] && . "$HOME/.golang_env"'
-if [ -f "$HOME/.zshrc" ]; then
-  ensure_line "$HOME/.zshrc" '[ -f "$HOME/.golang_env" ] && . "$HOME/.golang_env"'
-fi
+ensure_line "$HOME/.zshrc" '[ -f "$HOME/.golang_env" ] && . "$HOME/.golang_env"'
 
 if command -v git >/dev/null 2>&1; then
   git_include_paths="$(git config --global --get-all include.path 2>/dev/null || true)"
