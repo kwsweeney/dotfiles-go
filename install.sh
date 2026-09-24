@@ -54,7 +54,8 @@ if [ -f "$HOME/.zshrc" ]; then
 fi
 
 if command -v git >/dev/null 2>&1; then
-  if ! git config --global --get-all include.path | grep -Fqx "$HOME/.gitconfig.dotfiles-go"; then
+  git_include_paths="$(git config --global --get-all include.path 2>/dev/null || true)"
+  if ! printf '%s\n' "$git_include_paths" | grep -Fqx "$HOME/.gitconfig.dotfiles-go"; then
     git config --global --add include.path "$HOME/.gitconfig.dotfiles-go"
   fi
 fi
