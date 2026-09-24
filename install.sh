@@ -55,9 +55,11 @@ ensure_line "$HOME/.profile" '[ -f "$HOME/.golang_env" ] && . "$HOME/.golang_env
 ensure_line "$HOME/.zshrc" '[ -f "$HOME/.golang_env" ] && . "$HOME/.golang_env"'
 
 if command -v git >/dev/null 2>&1; then
+  git_include_target='~/.gitconfig.dotfiles-go'
   git_include_paths="$(git config --global --get-all include.path 2>/dev/null || true)"
-  if ! printf '%s\n' "$git_include_paths" | grep -Fqx "$HOME/.gitconfig.dotfiles-go"; then
-    git config --global --add include.path "$HOME/.gitconfig.dotfiles-go"
+  if ! printf '%s\n' "$git_include_paths" | grep -Fqx "$git_include_target" &&
+    ! printf '%s\n' "$git_include_paths" | grep -Fqx "$HOME/.gitconfig.dotfiles-go"; then
+    git config --global --add include.path "$git_include_target"
   fi
 fi
 
