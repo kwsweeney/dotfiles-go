@@ -65,7 +65,7 @@ fi
 
 if [ ! -e "$HOME/.vimrc" ] && [ ! -L "$HOME/.vimrc" ]; then
   ln -s "$HOME/.vimrc.dotfiles-go" "$HOME/.vimrc"
-elif [ "$HOME/.vimrc" -ef "$HOME/.vimrc.dotfiles-go" ]; then
+elif [ -L "$HOME/.vimrc" ] && [ "$(readlink "$HOME/.vimrc")" = "$HOME/.vimrc.dotfiles-go" ]; then
   :
 else
   ensure_vim_source
