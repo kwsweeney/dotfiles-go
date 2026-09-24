@@ -70,6 +70,9 @@ repo_vimrc="$repo_root/.vimrc"
 
 if [ ! -e "$HOME/.vimrc" ] && [ ! -L "$HOME/.vimrc" ]; then
   ln -s "$HOME/.vimrc.dotfiles-go" "$HOME/.vimrc"
+elif [ -L "$HOME/.vimrc" ] && [ ! -e "$HOME/.vimrc" ]; then
+  rm -f "$HOME/.vimrc"
+  ln -s "$HOME/.vimrc.dotfiles-go" "$HOME/.vimrc"
 elif [ -L "$HOME/.vimrc" ] && {
   [ "$(readlink "$HOME/.vimrc")" = "$managed_vimrc" ] ||
     [ "$(readlink "$HOME/.vimrc")" = "$repo_vimrc" ]
