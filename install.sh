@@ -76,6 +76,7 @@ elif [ -L "$HOME/.vimrc" ] && [ ! -e "$HOME/.vimrc" ]; then
   ln -s "$HOME/.vimrc.dotfiles-go" "$HOME/.vimrc"
 elif [ -L "$HOME/.vimrc" ] && {
   [ "$vimrc_link_target" = "$managed_vimrc" ] ||
+    [ "$vimrc_link_target" = "~/.vimrc.dotfiles-go" ] ||
     [ "$vimrc_link_target" = ".vimrc.dotfiles-go" ] ||
     [ "$vimrc_link_target" = "./.vimrc.dotfiles-go" ] ||
     [ "$vimrc_link_target" = "$repo_vimrc" ]
