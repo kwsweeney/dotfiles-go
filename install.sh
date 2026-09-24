@@ -29,9 +29,12 @@ ensure_vim_source() {
 write_goenv() {
   local target="$HOME/.config/go/env"
   local home_escaped="${HOME//\\/\\\\}"
+  local temp_file
   home_escaped="${home_escaped//&/\\&}"
   mkdir -p "$(dirname "$target")"
-  sed "s|__HOME__|$home_escaped|g" "$repo_root/.config/go/env" > "$target"
+  temp_file="$(mktemp "${target}.tmp.XXXXXX")"
+  sed "s|__HOME__|$home_escaped|g" "$repo_root/.config/go/env" > "$temp_file"
+  mv "$temp_file" "$target"
 }
 
 link_file() {
@@ -60,7 +63,9 @@ if command -v git >/dev/null 2>&1; then
   fi
 fi
 
-if [ ! -L "$HOME/.vimrc" ]; then
+if [ -e "$HOME/.vimrc" ] && [ "$HOME/.vimrc" -ef "$HOME/.vimrc.dotfiles-go" ]; then
+  :
+else
   ensure_vim_source
 fi
 
