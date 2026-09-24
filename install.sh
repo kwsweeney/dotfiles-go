@@ -63,10 +63,12 @@ if command -v git >/dev/null 2>&1; then
   fi
 fi
 
+managed_vimrc="$(readlink -f "$HOME/.vimrc.dotfiles-go")"
+
 if [ ! -e "$HOME/.vimrc" ] && [ ! -L "$HOME/.vimrc" ]; then
   ln -s "$HOME/.vimrc.dotfiles-go" "$HOME/.vimrc"
-elif [ -L "$HOME/.vimrc" ] && [ "$(readlink "$HOME/.vimrc")" = "$HOME/.vimrc.dotfiles-go" ]; then
-  :
+elif [ -L "$HOME/.vimrc" ] && [ "$(readlink -f "$HOME/.vimrc")" = "$managed_vimrc" ]; then
+  ln -sfn "$HOME/.vimrc.dotfiles-go" "$HOME/.vimrc"
 else
   ensure_vim_source
 fi
