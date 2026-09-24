@@ -81,10 +81,35 @@ EOT
   assert_contains "GOBIN=$home_dir/go/bin" "$home_dir/.config/go/env"
 }
 
+case_goenv_symlink_merge() {
+  local home_dir
+  home_dir="$(mktemp -d)"
+  mkdir -p "$home_dir/.config/go"
+  cat > "$home_dir/go-env-source" <<'EOT'
+GOFLAGS=-mod=mod
+GOPATH=/old/go
+EOT
+  ln -s "$home_dir/go-env-source" "$home_dir/.config/go/env"
+  run_install "$home_dir"
+  assert_contains 'GOFLAGS=-mod=mod' "$home_dir/.config/go/env"
+  assert_contains "GOPATH=$home_dir/go" "$home_dir/.config/go/env"
+  assert_contains "GOBIN=$home_dir/go/bin" "$home_dir/.config/go/env"
+}
+
+case_matching_managed_symlink() {
+  local home_dir
+  home_dir="$(mktemp -d)"
+  ln -s "$repo_root/.golang_env" "$home_dir/.golang_env"
+  run_install "$home_dir"
+  assert_eq "$repo_root/.golang_env" "$(readlink "$home_dir/.golang_env")" "matching managed symlink should remain intact"
+}
+
 case_missing_vimrc
 case_broken_vimrc_symlink
 case_regular_vimrc
 case_unrelated_vimrc_symlink
 case_goenv_merge
+case_goenv_symlink_merge
+case_matching_managed_symlink
 
 echo 'install.sh tests passed'

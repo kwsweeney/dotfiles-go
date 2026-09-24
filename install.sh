@@ -54,7 +54,10 @@ install_managed_file() {
   mkdir -p "$(dirname "$target")"
 
   if [ -L "$target" ]; then
-    rm -f "$target"
+    if [ -e "$target" ] && cmp -s "$source" "$target"; then
+      return 0
+    fi
+    backup_existing_path "$target"
   elif [ -e "$target" ] && ! cmp -s "$source" "$target"; then
     backup_existing_path "$target"
   fi
@@ -72,6 +75,9 @@ write_goenv() {
   temp_file="$(mktemp -p "$target_dir" env.tmp.XXXXXX)"
 
   if [ -L "$target" ]; then
+    if [ -e "$target" ]; then
+      grep -vE '^(GOPATH|GOBIN)=' "$target" > "$temp_file" || true
+    fi
     backup_existing_path "$target"
   elif [ -f "$target" ]; then
     grep -vE '^(GOPATH|GOBIN)=' "$target" > "$temp_file" || true
