@@ -28,9 +28,11 @@ ensure_vim_source() {
 
 write_goenv() {
   local target="$HOME/.config/go/env"
+  local target_dir
   local temp_file
-  mkdir -p "$(dirname "$target")"
-  temp_file="$(mktemp)"
+  target_dir="$(dirname "$target")"
+  mkdir -p "$target_dir"
+  temp_file="$(mktemp "$target_dir/env.tmp.XXXXXX")"
   if ! printf 'GOPATH=%s/go\nGOBIN=%s/go/bin\n' "$HOME" "$HOME" > "$temp_file"; then
     rm -f -- "$temp_file"
     exit 1
@@ -47,6 +49,9 @@ link_file() {
   local target="$2"
 
   mkdir -p "$(dirname "$target")"
+  if [ -e "$target" ] && [ ! -L "$target" ]; then
+    rm -f "$target"
+  fi
   ln -sfn "$source" "$target"
 }
 
