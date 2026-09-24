@@ -75,6 +75,8 @@ elif [ -L "$HOME/.vimrc" ] && [ ! -e "$HOME/.vimrc" ]; then
   ln -s "$HOME/.vimrc.dotfiles-go" "$HOME/.vimrc"
 elif [ -L "$HOME/.vimrc" ] && {
   [ "$(readlink "$HOME/.vimrc")" = "$managed_vimrc" ] ||
+    [ "$(readlink "$HOME/.vimrc")" = ".vimrc.dotfiles-go" ] ||
+    [ "$(readlink "$HOME/.vimrc")" = "./.vimrc.dotfiles-go" ] ||
     [ "$(readlink "$HOME/.vimrc")" = "$repo_vimrc" ]
 }; then
   ln -sfn "$HOME/.vimrc.dotfiles-go" "$HOME/.vimrc"
