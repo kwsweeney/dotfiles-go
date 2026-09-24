@@ -1,0 +1,10 @@
+[core]
+    editor = vim
+[color]
+    ui = auto
+[fetch]
+    prune = true
+[init]
+    defaultBranch = main
+[push]
+    autoSetupRemote = true

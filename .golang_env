@@ -1,0 +1,15 @@
+export GOPATH="${GOPATH:-$HOME/go}"
+export GOBIN="${GOBIN:-$GOPATH/bin}"
+
+add_to_path() {
+  case ":$PATH:" in
+    *":$1:"*) ;;
+    *) PATH="$1:$PATH" ;;
+  esac
+}
+
+[ -d /usr/local/go/bin ] && add_to_path /usr/local/go/bin
+add_to_path "$HOME/.local/bin"
+add_to_path "$GOBIN"
+
+export PATH
