@@ -47,10 +47,16 @@ write_goenv() {
 link_file() {
   local source="$1"
   local target="$2"
+  local backup_target="$target.dotfiles-go.bak"
+  local backup_index=0
 
   mkdir -p "$(dirname "$target")"
   if [ -e "$target" ] && [ ! -L "$target" ]; then
-    rm -f "$target"
+    while [ -e "$backup_target" ] || [ -L "$backup_target" ]; do
+      backup_index=$((backup_index + 1))
+      backup_target="$target.dotfiles-go.bak.$backup_index"
+    done
+    mv "$target" "$backup_target"
   fi
   ln -sfn "$source" "$target"
 }
