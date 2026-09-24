@@ -68,18 +68,18 @@ vimrc_link_target="$(readlink "$HOME/.vimrc" 2>/dev/null || true)"
 
 if [ ! -e "$HOME/.vimrc" ] && [ ! -L "$HOME/.vimrc" ]; then
   ln -s "$HOME/.vimrc.dotfiles-go" "$HOME/.vimrc"
-elif [ -L "$HOME/.vimrc" ] && [ ! -e "$HOME/.vimrc" ]; then
-  rm -f "$HOME/.vimrc"
-  ln -s "$HOME/.vimrc.dotfiles-go" "$HOME/.vimrc"
-elif [ -L "$HOME/.vimrc" ] && {
-  [ "$vimrc_link_target" = "$managed_vimrc" ] ||
+elif [ -L "$HOME/.vimrc" ]; then
+  if [ ! -e "$HOME/.vimrc" ]; then
+    rm -f "$HOME/.vimrc"
+    ln -s "$HOME/.vimrc.dotfiles-go" "$HOME/.vimrc"
+  elif [ "$vimrc_link_target" = "$managed_vimrc" ] ||
     [ "$vimrc_link_target" = "~/.vimrc.dotfiles-go" ] ||
     [ "$vimrc_link_target" = ".vimrc.dotfiles-go" ] ||
     [ "$vimrc_link_target" = "./.vimrc.dotfiles-go" ] ||
-    [ "$vimrc_link_target" = "$repo_vimrc" ]
-}; then
-  ln -sfn "$HOME/.vimrc.dotfiles-go" "$HOME/.vimrc"
-elif [ ! -L "$HOME/.vimrc" ]; then
+    [ "$vimrc_link_target" = "$repo_vimrc" ]; then
+    ln -sfn "$HOME/.vimrc.dotfiles-go" "$HOME/.vimrc"
+  fi
+else
   ensure_vim_source
 fi
 
