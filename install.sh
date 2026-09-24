@@ -15,6 +15,17 @@ ensure_line() {
   fi
 }
 
+ensure_vim_source() {
+  local file="$HOME/.vimrc"
+
+  mkdir -p "$(dirname "$file")"
+  touch "$file"
+
+  if ! grep -Fq '.vimrc.dotfiles-go' "$file"; then
+    printf '\n%s\n' 'source ~/.vimrc.dotfiles-go' >> "$file"
+  fi
+}
+
 write_goenv() {
   local target="$HOME/.config/go/env"
   local home_escaped="${HOME//\\/\\\\}"
@@ -49,7 +60,7 @@ if command -v git >/dev/null 2>&1; then
 fi
 
 if [ ! -L "$HOME/.vimrc" ]; then
-  ensure_line "$HOME/.vimrc" 'source ~/.vimrc.dotfiles-go'
+  ensure_vim_source
 fi
 
 mkdir -p "$HOME/go/bin" "$HOME/go/pkg" "$HOME/go/src"
