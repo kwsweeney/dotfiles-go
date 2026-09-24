@@ -48,9 +48,7 @@ if command -v git >/dev/null 2>&1; then
   fi
 fi
 
-if [ -e "$HOME/.vimrc" ] && [ "$HOME/.vimrc" -ef "$HOME/.vimrc.dotfiles-go" ]; then
-  :
-else
+if [ ! -L "$HOME/.vimrc" ]; then
   ensure_line "$HOME/.vimrc" 'source ~/.vimrc.dotfiles-go'
 fi
 
