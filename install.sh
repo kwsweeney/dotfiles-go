@@ -26,44 +26,64 @@ ensure_vim_source() {
   fi
 }
 
+next_backup_path() {
+  local target="$1"
+  local backup_target="$target.dotfiles-go.bak"
+  local backup_index=0
+
+  while [ -e "$backup_target" ] || [ -L "$backup_target" ]; do
+    backup_index=$((backup_index + 1))
+    backup_target="$target.dotfiles-go.bak.$backup_index"
+  done
+
+  printf '%s\n' "$backup_target"
+}
+
+backup_existing_path() {
+  local target="$1"
+  local backup_target
+
+  backup_target="$(next_backup_path "$target")"
+  mv "$target" "$backup_target"
+}
+
+install_managed_file() {
+  local source="$1"
+  local target="$2"
+
+  mkdir -p "$(dirname "$target")"
+
+  if [ -L "$target" ]; then
+    rm -f "$target"
+  elif [ -e "$target" ] && ! cmp -s "$source" "$target"; then
+    backup_existing_path "$target"
+  fi
+
+  cp "$source" "$target"
+}
+
 write_goenv() {
   local target="$HOME/.config/go/env"
   local target_dir
   local temp_file
+
   target_dir="$(dirname "$target")"
   mkdir -p "$target_dir"
-  temp_file="$(mktemp "$target_dir/env.tmp.XXXXXX")"
-  if ! printf 'GOPATH=%s/go\nGOBIN=%s/go/bin\n' "$HOME" "$HOME" > "$temp_file"; then
-    rm -f -- "$temp_file"
-    exit 1
+  temp_file="$(mktemp -p "$target_dir" env.tmp.XXXXXX)"
+
+  if [ -L "$target" ]; then
+    backup_existing_path "$target"
+  elif [ -f "$target" ]; then
+    grep -vE '^(GOPATH|GOBIN)=' "$target" > "$temp_file" || true
   fi
 
-  if ! mv "$temp_file" "$target"; then
-    rm -f -- "$temp_file"
-    exit 1
-  fi
+  printf 'GOPATH=%s/go\nGOBIN=%s/go/bin\n' "$HOME" "$HOME" >> "$temp_file"
+  mv "$temp_file" "$target"
 }
 
-link_file() {
-  local source="$1"
-  local target="$2"
-  local backup_target="$target.dotfiles-go.bak"
-  local backup_index=0
-
-  mkdir -p "$(dirname "$target")"
-  if [ -e "$target" ] && [ ! -L "$target" ]; then
-    while [ -e "$backup_target" ] || [ -L "$backup_target" ]; do
-      backup_index=$((backup_index + 1))
-      backup_target="$target.dotfiles-go.bak.$backup_index"
-    done
-    mv "$target" "$backup_target"
-  fi
-  ln -sfn "$source" "$target"
-}
-
-link_file "$repo_root/.golang_env" "$HOME/.golang_env"
-link_file "$repo_root/.gitconfig" "$HOME/.gitconfig.dotfiles-go"
-link_file "$repo_root/.vimrc" "$HOME/.vimrc.dotfiles-go"
+install_managed_file "$repo_root/.golang_env" "$HOME/.golang_env"
+install_managed_file "$repo_root/.gitconfig" "$HOME/.gitconfig.dotfiles-go"
+install_managed_file "$repo_root/.vimrc" "$HOME/.vimrc.dotfiles-go"
 write_goenv
 
 ensure_line "$HOME/.bashrc" '[ -f "$HOME/.golang_env" ] && . "$HOME/.golang_env"'
@@ -84,17 +104,17 @@ repo_vimrc="$repo_root/.vimrc"
 vimrc_link_target="$(readlink "$HOME/.vimrc" 2>/dev/null || true)"
 
 if [ ! -e "$HOME/.vimrc" ] && [ ! -L "$HOME/.vimrc" ]; then
-  ln -s "$HOME/.vimrc.dotfiles-go" "$HOME/.vimrc"
+  ln -s "$managed_vimrc" "$HOME/.vimrc"
 elif [ -L "$HOME/.vimrc" ]; then
   if [ ! -e "$HOME/.vimrc" ]; then
     rm -f "$HOME/.vimrc"
-    ln -s "$HOME/.vimrc.dotfiles-go" "$HOME/.vimrc"
+    ln -s "$managed_vimrc" "$HOME/.vimrc"
   elif [ "$vimrc_link_target" = "$managed_vimrc" ] ||
-    [ "$vimrc_link_target" = "~/.vimrc.dotfiles-go" ] ||
-    [ "$vimrc_link_target" = ".vimrc.dotfiles-go" ] ||
-    [ "$vimrc_link_target" = "./.vimrc.dotfiles-go" ] ||
+    [ "$vimrc_link_target" = '~/.vimrc.dotfiles-go' ] ||
+    [ "$vimrc_link_target" = '.vimrc.dotfiles-go' ] ||
+    [ "$vimrc_link_target" = './.vimrc.dotfiles-go' ] ||
     [ "$vimrc_link_target" = "$repo_vimrc" ]; then
-    ln -sfn "$HOME/.vimrc.dotfiles-go" "$HOME/.vimrc"
+    ln -sfn "$managed_vimrc" "$HOME/.vimrc"
   fi
 else
   ensure_vim_source
