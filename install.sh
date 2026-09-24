@@ -26,10 +26,6 @@ ensure_vim_source() {
   fi
 }
 
-resolve_path() {
-  python3 -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' "$1"
-}
-
 write_goenv() {
   local target="$HOME/.config/go/env"
   local home_escaped="${HOME//\\/\\\\}"
@@ -70,21 +66,23 @@ if command -v git >/dev/null 2>&1; then
 fi
 
 managed_vimrc="$HOME/.vimrc.dotfiles-go"
-managed_vimrc_resolved="$(resolve_path "$managed_vimrc")"
-vimrc_resolved=""
-
-if [ -e "$HOME/.vimrc" ] || [ -L "$HOME/.vimrc" ]; then
-  vimrc_resolved="$(resolve_path "$HOME/.vimrc")"
-fi
+repo_vimrc="$repo_root/.vimrc"
+vimrc_link_target="$(readlink "$HOME/.vimrc" 2>/dev/null || true)"
 
 if [ ! -e "$HOME/.vimrc" ] && [ ! -L "$HOME/.vimrc" ]; then
   ln -s "$HOME/.vimrc.dotfiles-go" "$HOME/.vimrc"
 elif [ -L "$HOME/.vimrc" ] && [ ! -e "$HOME/.vimrc" ]; then
   rm -f "$HOME/.vimrc"
   ln -s "$HOME/.vimrc.dotfiles-go" "$HOME/.vimrc"
-elif [ -L "$HOME/.vimrc" ] && [ "$vimrc_resolved" = "$managed_vimrc_resolved" ]; then
+elif [ -L "$HOME/.vimrc" ] && {
+  [ "$vimrc_link_target" = "$managed_vimrc" ] ||
+    [ "$vimrc_link_target" = "~/.vimrc.dotfiles-go" ] ||
+    [ "$vimrc_link_target" = ".vimrc.dotfiles-go" ] ||
+    [ "$vimrc_link_target" = "./.vimrc.dotfiles-go" ] ||
+    [ "$vimrc_link_target" = "$repo_vimrc" ]
+}; then
   ln -sfn "$HOME/.vimrc.dotfiles-go" "$HOME/.vimrc"
-else
+elif [ ! -L "$HOME/.vimrc" ]; then
   ensure_vim_source
 fi
 
