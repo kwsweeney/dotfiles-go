@@ -33,8 +33,10 @@ write_goenv() {
   home_escaped="${home_escaped//&/\\&}"
   mkdir -p "$(dirname "$target")"
   temp_file="$(mktemp)"
+  trap "rm -f -- '$temp_file'" EXIT
   sed "s|__HOME__|$home_escaped|g" "$repo_root/.config/go/env" > "$temp_file"
   mv "$temp_file" "$target"
+  trap - EXIT
 }
 
 link_file() {
@@ -63,11 +65,15 @@ if command -v git >/dev/null 2>&1; then
   fi
 fi
 
-managed_vimrc="$(readlink -f "$HOME/.vimrc.dotfiles-go")"
+managed_vimrc="$HOME/.vimrc.dotfiles-go"
+repo_vimrc="$repo_root/.vimrc"
 
 if [ ! -e "$HOME/.vimrc" ] && [ ! -L "$HOME/.vimrc" ]; then
   ln -s "$HOME/.vimrc.dotfiles-go" "$HOME/.vimrc"
-elif [ -L "$HOME/.vimrc" ] && [ "$(readlink -f "$HOME/.vimrc")" = "$managed_vimrc" ]; then
+elif [ -L "$HOME/.vimrc" ] && {
+  [ "$(readlink "$HOME/.vimrc")" = "$managed_vimrc" ] ||
+    [ "$(readlink "$HOME/.vimrc")" = "$repo_vimrc" ]
+}; then
   ln -sfn "$HOME/.vimrc.dotfiles-go" "$HOME/.vimrc"
 else
   ensure_vim_source
